@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LoanServiceImpl implements LoanService {
@@ -41,7 +42,7 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public LoanEligibleResponseDTO checkLoanEligibility(LoanEligibleRequestDTO loanEligibleRequestDTO){
         System.out.println("checkLoanEligibility");
-        Account account = accountRepository.findByAccountNumber(loanEligibleRequestDTO.getAccountNumber());
+        Optional<Account> account = accountRepository.findByAccountNumber(loanEligibleRequestDTO.getAccountNumber());
         LoanEligibleResponseDTO responseDTO;
 
         Eligibility eligibility;

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -51,7 +52,9 @@ public class AccountServiceImpl implements AccountService {
                 accountNumber,
                 BigDecimal.ZERO,
                 accountRequestDTO.getAccountType(),
-                AccountStatus.ACTIVE
+                AccountStatus.ACTIVE,
+                accountRequestDTO.getMobileNumber(),
+                accountRequestDTO.getEmailId()
                 );
         accountRepository.save(account);
     }
@@ -97,25 +100,24 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public BigDecimal deposit(DepositDTO depositDTO){
 
-        Account account = accountRepository.findByAccountNumber(depositDTO.getAccountNumber());
+        Optional<Account> account = accountRepository.findByAccountNumber(depositDTO.getAccountNumber());
 
-        account.setBalance(account.getBalance().add(depositDTO.getAmount()));
+        account.get().setBalance(account.get().getBalance().add(depositDTO.getAmount()));
 
-        accountRepository.save(account);
+        accountRepository.save(account.get());
 
-        return account.getBalance();
+        return account.get().getBalance();
 
     }
 
     @Override
     public BigDecimal withdraw(WithdrawDTO withdrawDTO){
 
-        Account account = accountRepository.findByAccountNumber(withdrawDTO.getAccountNumber());
-
-        if(account.getBalance().compareTo(withdrawDTO.getAmount())>=0){
-            account.setBalance(account.getBalance().subtract(withdrawDTO.getAmount()));
-            accountRepository.save(account);
-            return account.getBalance();
+        Optional<Account> account = accountRepository.findByAccountNumber(withdrawDTO.getAccountNumber());
+        if(account.get().getBalance().compareTo(withdrawDTO.getAmount())>=0){
+            account.get().setBalance(account.get().getBalance().subtract(withdrawDTO.getAmount()));
+            accountRepository.save(account.get());
+            return account.get().getBalance();
         }
 
         return new BigDecimal(-1);
