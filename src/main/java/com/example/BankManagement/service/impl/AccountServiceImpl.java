@@ -4,6 +4,7 @@ import com.example.BankManagement.dto.*;
 import com.example.BankManagement.entity.Account;
 import com.example.BankManagement.enums.AccountStatus;
 import com.example.BankManagement.exception.DuplicateResourceException;
+import com.example.BankManagement.exception.InsufficientAccountBalanceException;
 import com.example.BankManagement.exception.ResourceNotFoundException;
 import com.example.BankManagement.repository.AccountRepository;
 import com.example.BankManagement.service.AccountService;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -78,21 +78,28 @@ public class AccountServiceImpl implements AccountService {
         List<AccountResponseDTO> list = new ArrayList<>();
 
         List<Account> accountList = accountRepository.findAll();
-        System.out.println(accountList);
+
         for(Account account : accountList){
 
             list.add(new AccountResponseDTO(account.getAccountNumber(), account.getAccountHolderName(), account.getBalance()));
         }
-        System.out.println(list);
+
         return list;
     }
 
     @Override
     public void updateAccount(AccountUpdateRequestDTO accountUpdateRequestDTO) {
-        Account account = accountRepository.findByAccountNumber(accountUpdateRequestDTO.getAccountNumber()).orElseThrow(() -> new ResourceNotFoundException("Account not found with ID: " + accountUpdateRequestDTO.getAccountNumber()));
+
+        Account account = accountRepository.findByAccountNumber(accountUpdateRequestDTO.getAccountNumber())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with ID: "
+                        + accountUpdateRequestDTO.getAccountNumber()));
+
         account.setAccountHolderName(accountUpdateRequestDTO.getName());
+
         account.setMobileNumber(accountUpdateRequestDTO.getMobileNumber());
+
         account.setEmailId(accountUpdateRequestDTO.getEmailId());
+
         accountRepository.save(account);
 
     }
@@ -100,34 +107,42 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public BigDecimal deposit(DepositDTO depositDTO){
 
-        Optional<Account> account = accountRepository.findByAccountNumber(depositDTO.getAccountNumber());
+        Account account =  accountRepository.findByAccountNumber(depositDTO.getAccountNumber())
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with ID: " + depositDTO.getAccountNumber()));
 
-        account.get().setBalance(account.get().getBalance().add(depositDTO.getAmount()));
+        account.setBalance(account.getBalance().add(depositDTO.getAmount()));
 
-        accountRepository.save(account.get());
+        accountRepository.save(account);
 
-        return account.get().getBalance();
+        return account.getBalance();
 
     }
 
     @Override
     public BigDecimal withdraw(WithdrawDTO withdrawDTO){
 
-        Optional<Account> account = accountRepository.findByAccountNumber(withdrawDTO.getAccountNumber());
-        if(account.get().getBalance().compareTo(withdrawDTO.getAmount())>=0){
-            account.get().setBalance(account.get().getBalance().subtract(withdrawDTO.getAmount()));
-            accountRepository.save(account.get());
-            return account.get().getBalance();
+        Account account = accountRepository.findByAccountNumber(withdrawDTO.getAccountNumber())
+                .orElseThrow(() ->  new ResourceNotFoundException("Account not found with ID: " + withdrawDTO.getAccountNumber()));
+
+        if(account.getBalance().compareTo(withdrawDTO.getAmount()) < 0) {
+            throw new InsufficientAccountBalanceException(
+                    "Insufficient balance. Available balance: "
+                            + account.getBalance()
+                            + "Withdrawal amount: "
+                            + withdrawDTO.getAmount());
         }
 
-        return new BigDecimal(-1);
-
+            account.setBalance(account.getBalance().subtract(withdrawDTO.getAmount()));
+            accountRepository.save(account);
+            return account.getBalance();
     }
 
     @Transactional
     @Override
     public void closeAccount(String accountNumber){
-        accountRepository.deleteByAccountNumber(accountNumber);
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() ->  new ResourceNotFoundException("Account not found with ID: " + accountNumber));
+        accountRepository.deleteByAccountNumber(account.getAccountNumber());
     }
 
 }
