@@ -21,8 +21,9 @@ public class AccountUpdateRequestDTO {
     @NotBlank
     private String accountNumber;
 
-    public AccountUpdateRequestDTO(String name, String mobileNumber, String accountNumber) {
+    public AccountUpdateRequestDTO(String name, String emailId, String mobileNumber, String accountNumber) {
         this.name = name;
+        this.emailId=emailId;
         this.mobileNumber = mobileNumber;
         this.accountNumber = accountNumber;
     }
