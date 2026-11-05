@@ -52,12 +52,12 @@ public class AccountController {
     }
 
     @PostMapping("/deposit")
-    public BigDecimal deposit(@RequestBody DepositDTO depositDTO){
+    public BigDecimal deposit(@Valid @RequestBody DepositDTO depositDTO){
         return accountService.deposit(depositDTO);
     }
 
     @PostMapping("/withdraw")
-    public BigDecimal withdraw(@RequestBody WithdrawDTO withdrawDTO){
+    public BigDecimal withdraw(@Valid @RequestBody WithdrawDTO withdrawDTO){
         return accountService.withdraw(withdrawDTO);
     }
 

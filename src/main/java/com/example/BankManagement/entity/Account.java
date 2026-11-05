@@ -40,6 +40,12 @@ public class Account {
     @Column(nullable = false, length = 100)
     private String emailId;
 
+    @Column(nullable = false, unique = true, length = 20)
+    private String panCardNumber;
+
+    @Column(nullable = false, unique = true, length = 20)
+    private String adharCardNumber;
+
     public Account() {}
 
     public Account(String accountHolderName, String accountNumber,

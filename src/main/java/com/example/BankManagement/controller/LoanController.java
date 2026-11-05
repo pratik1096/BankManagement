@@ -1,5 +1,6 @@
 package com.example.BankManagement.controller;
 
+import jakarta.validation.Valid;
 import com.example.BankManagement.dto.LoanEligibleRequestDTO;
 import com.example.BankManagement.dto.LoanEligibleResponseDTO;
 import com.example.BankManagement.dto.LoanRequestDTO;
@@ -22,12 +23,12 @@ public class LoanController {
     }
 
     @PostMapping("/eligibility")
-    public LoanEligibleResponseDTO checkLoanEligibility(@RequestBody LoanEligibleRequestDTO loanEligibleRequestDTO){
+    public LoanEligibleResponseDTO checkLoanEligibility(@Valid @RequestBody LoanEligibleRequestDTO loanEligibleRequestDTO){
        return loanService.checkLoanEligibility(loanEligibleRequestDTO);
     }
 
     @PostMapping("/applyLoan")
-    public LoanResponseDTO applyLoan(@RequestBody LoanRequestDTO loanRequestDTO){
+    public LoanResponseDTO applyLoan(@Valid @RequestBody LoanRequestDTO loanRequestDTO){
         return loanService.applyLoan(loanRequestDTO);
     }
 
