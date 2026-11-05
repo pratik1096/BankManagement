@@ -3,6 +3,7 @@ package com.example.BankManagement.exception;
 import com.example.BankManagement.dto.ErrorResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -33,7 +34,19 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getDescription(false).replace("uri=", "")
         );
-        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InsufficientAccountBalanceException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInsufficientBalance(
+            InsufficientAccountBalanceException ex, WebRequest request) {
+        ErrorResponseDTO errorDetails = new ErrorResponseDTO(
+                HttpStatus.BAD_REQUEST.value(),
+                "BAD_REQUEST",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -45,19 +58,18 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getDescription(false).replace("uri=", "")
         );
-        return new ResponseEntity<>(errorDetails,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDTO> InsuffientAccountBalanceException(
-            InsufficientAccountBalanceException ex, WebRequest request) {
+    @ExceptionHandler(com.example.BankManagement.exception.MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDTO> handleCustomValidationException(
+            com.example.BankManagement.exception.MethodArgumentNotValidException ex, WebRequest request) {
         ErrorResponseDTO errorDetails = new ErrorResponseDTO(
                 HttpStatus.BAD_REQUEST.value(),
                 "BAD_REQUEST",
                 ex.getMessage(),
                 request.getDescription(false).replace("uri=", "")
         );
-        return new ResponseEntity<>(errorDetails,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
-
 }

@@ -55,7 +55,9 @@ public class AccountServiceImpl implements AccountService {
                 AccountStatus.ACTIVE,
                 accountRequestDTO.getMobileNumber(),
                 accountRequestDTO.getEmailId()
-                );
+        );
+        account.setPanCardNumber(accountRequestDTO.getPanCardNumber());
+        account.setAdharCardNumber(accountRequestDTO.getAdharCardNumber());
         accountRepository.save(account);
     }
 

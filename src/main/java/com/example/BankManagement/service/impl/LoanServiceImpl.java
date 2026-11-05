@@ -11,6 +11,7 @@ import com.example.BankManagement.enums.EligibilityStatus;
 import com.example.BankManagement.enums.LoanStatus;
 import com.example.BankManagement.repository.AccountRepository;
 import com.example.BankManagement.repository.EligibilityRepository;
+import com.example.BankManagement.exception.ResourceNotFoundException;
 import com.example.BankManagement.repository.LoanRepository;
 import com.example.BankManagement.service.LoanService;
 import org.springframework.stereotype.Service;
@@ -141,6 +142,9 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public LoanResponseDTO getLoan(String loanAccountNumber){
         Loan loan = loanRepository.findByLoanAccountNumber(loanAccountNumber);
+        if (loan == null) {
+            throw new ResourceNotFoundException("Loan not found with ID: " + loanAccountNumber);
+        }
 
         return new LoanResponseDTO(loan.getLoanAccountNumber(),
                 loan.getAmountSanctioned(),loan.getLoanStatus(),loan.getRemarks());
@@ -149,7 +153,7 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public List<LoanResponseDTO> getLoansByAccountNumber(String accountNumber){
-        List<Loan> list = loanRepository.findAll(accountNumber);
+        List<Loan> list = loanRepository.findByAccountNumber(accountNumber);
         List<LoanResponseDTO> responseList = new ArrayList<>();
         for(Loan loan : list){
             responseList.add(new LoanResponseDTO(loan.getLoanAccountNumber(),
@@ -176,6 +180,9 @@ public class LoanServiceImpl implements LoanService {
                                        String remarks, LoanStatus loanStatus){
 
         Loan loan = loanRepository.findByLoanAccountNumber(loanAccountNumber);
+        if (loan == null) {
+            throw new ResourceNotFoundException("Loan not found with ID: " + loanAccountNumber);
+        }
 
         loan.setAmountSanctioned(amount);
         loan.setInterestRate(interest);
